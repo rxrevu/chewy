@@ -21,7 +21,10 @@ module Chewy
           import_options = args.extract_options!
           bulk_options = import_options.reject { |k, v| ![:refresh, :suffix].include?(k) }.reverse_merge!(refresh: true)
 
-          index.create!(bulk_options.slice(:suffix)) unless index.exists?
+          index_name = index.build_index_name(suffix: bulk_options[:suffix])
+          index_exists = client.indices.exists(index: index_name)
+          index.create!(bulk_options[:suffix], **import_options.slice(:alias)) unless index_exists
+
           build_root unless self.root_object
 
           ActiveSupport::Notifications.instrument 'import_objects.chewy', type: self do |payload|
