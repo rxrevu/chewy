@@ -81,6 +81,10 @@ module Chewy
             (args.one? && args.first.is_a?(relation_class) ? args.first : args.flatten.compact)
 
           if collection.is_a?(relation_class)
+            if import_options[:reset_default_scope]
+              @default_scope = collection
+              cleanup_default_scope!
+            end
             import_scope(collection, batch_size, &block)
           else
             import_objects(collection, batch_size, &block)
